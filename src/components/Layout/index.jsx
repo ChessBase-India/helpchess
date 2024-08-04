@@ -2,6 +2,7 @@ import { Component } from "react";
 import styled from "styled-components";
 
 import Header from "./Header";
+import Footer from "./Footer";
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -22,6 +23,7 @@ class Layout extends Component {
       <MainLayout>
         <Header />
         <LayoutContainer>{this.props.children}</LayoutContainer>
+        <Footer />
       </MainLayout>
     );
   }
