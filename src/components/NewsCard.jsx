@@ -80,10 +80,11 @@ export default function NewsCard({
   month,
   link,
   loadMore,
+  onClick,
 }) {
   if (loadMore) {
     return (
-      <button>
+      <button onClick={onClick}>
         <LoadMoreCard>
           <p>Load all</p>
         </LoadMoreCard>

@@ -16,6 +16,8 @@ import SupportOrgCard from "@/components/SupportOrgCard";
 import Button from "@/components/Button";
 import { BREAK_POINTS } from "@/styles/responsive";
 
+const initialArticleLoadLimit = 8;
+
 const dummy = {
   range: "Sheet1!A1:E700",
   majorDimension: "ROWS",
@@ -621,6 +623,7 @@ const SectionDonations = styled.section`
   -ms-overflow-style: none;
   scrollbar-width: none;
 `;
+
 const ImageBannerContainer = styled.span`
   width: 100%;
   max-height: 1000px;
@@ -699,6 +702,9 @@ const SectionWidgets = styled.section`
 export default function Home() {
   const [donors, setDonors] = useState([]);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [articleLoadLimit, setArticleLoadLimit] = useState(
+    initialArticleLoadLimit,
+  );
 
   const donationsScrollRef = useRef(null);
   const testimonialsScrollRef = useRef(null);
@@ -860,18 +866,22 @@ export default function Home() {
             See how your contributions are helping many chess players.
           </SectionDescription>
           {/* ["Name", "Amount", "Description", "Month", "Link"] */}
-          <span className="articles">
-            {dummy.values.slice(1, 8).map((news) => (
-              <NewsCard
-                title={news[0]}
-                amount={news[1]}
-                description={news[2]}
-                month={news[3]}
-                link={news[4]}
-              ></NewsCard>
-            ))}
-            <NewsCard loadMore />
-          </span>
+          {articleLoadLimit && (
+            <span className="articles">
+              {dummy.values.slice(1, articleLoadLimit).map((news) => (
+                <NewsCard
+                  title={news[0]}
+                  amount={news[1]}
+                  description={news[2]}
+                  month={news[3]}
+                  link={news[4]}
+                ></NewsCard>
+              ))}
+              {articleLoadLimit === initialArticleLoadLimit && (
+                <NewsCard loadMore onClick={() => setArticleLoadLimit(1000)} />
+              )}
+            </span>
+          )}
         </SectionNews>
         <ImageBannerContainer>
           <CheckPattern className="pattern-top" />
