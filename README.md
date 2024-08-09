@@ -32,4 +32,4 @@ Open `http://localhost:3000` with your browser to see the result.
 
 Helpchess.org is an open source project and contributions are most welcome!
 
-See CONTRIBUTING.md to know more.
+See [CONTRIBUTING.md](https://github.com/ChessBase-India/helpchess/blob/main/CONTRIBUTING.md) to know more.
