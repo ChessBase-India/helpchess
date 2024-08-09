@@ -16,6 +16,8 @@ bug report and let us know!
 
 Here's the [Figma Design](https://www.figma.com/design/ovtobVhcQGARi9a9SovZbT/HELPCHESS_HANDOVER-FILES?node-id=201-2&t=klD8uoXzuoZdVLlh-0). Feel free to raise PRs to adjust design w.r.t to Figma.
 
+Special thanks to [Trina Sen](https://www.linkedin.com/in/trina-sen-3b255b203/) for the designs.
+
 ## Ways to Contribute
 
 We welcome many different types of contributions including:
