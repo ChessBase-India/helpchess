@@ -12,6 +12,10 @@ our project that we need help with including:
 If anything doesn't make sense, or doesn't work when you run it, please open a
 bug report and let us know!
 
+## Design
+
+Here's the [Figma Design](https://www.figma.com/design/ovtobVhcQGARi9a9SovZbT/HELPCHESS_HANDOVER-FILES?node-id=201-2&t=klD8uoXzuoZdVLlh-0). Feel free to raise PRs to adjust design w.r.t to Figma.
+
 ## Ways to Contribute
 
 We welcome many different types of contributions including:
