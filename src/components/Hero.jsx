@@ -106,7 +106,10 @@ const Hero = () => {
     <HeroContainer>
       <HeroImageContainer>
         <StyledCheckPattern />
-        <HeroImage src="/images/hero.png" alt="Helpchess Hero Image" />
+        <HeroImage
+          src="/images/helpchess-praggnanandhaa.png"
+          alt="Helpchess Hero Image"
+        />
       </HeroImageContainer>
       <HeroTextContainer>
         <HeroTitle>You can power Indian Chess.</HeroTitle>
