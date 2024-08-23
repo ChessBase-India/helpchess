@@ -705,12 +705,30 @@ export default function Home() {
   const [articleLoadLimit, setArticleLoadLimit] = useState(
     initialArticleLoadLimit,
   );
+  const [workItems, setWorkItems] = useState([]);
 
   const donationsScrollRef = useRef(null);
   const testimonialsScrollRef = useRef(null);
 
   const openVideoModal = () => setIsVideoModalOpen(true);
   const closeVideoModal = () => setIsVideoModalOpen(false);
+
+  // Testing - Remove this
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch(
+        "https://sheets.googleapis.com/v4/spreadsheets/1yo2GrCH9uD9DKmehh534IhS9NlR5FPlESjNZHvCadO0/values/Sheet1!A1:E700?key=AIzaSyDRpd7XCVIQsju4cmbb1GXXEoxV7mG1Nzw",
+      );
+      const data = await response.json();
+      setWorkItems(data.values.slice(1)); // Skip the first item
+    }
+
+    fetchData();
+  }, []);
+
+  useEffect((workItems) => console.log(workItems), [workItems]);
+
+  // Till here
 
   const scrollRight = ({ type }) => {
     if (type === "donations") {
