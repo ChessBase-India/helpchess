@@ -720,6 +720,7 @@ export default function Home() {
         "https://sheets.googleapis.com/v4/spreadsheets/1yo2GrCH9uD9DKmehh534IhS9NlR5FPlESjNZHvCadO0/values/Sheet1!A1:E700?key=AIzaSyDRpd7XCVIQsju4cmbb1GXXEoxV7mG1Nzw",
       );
       const data = await response.json();
+      console.log(data);
       setWorkItems(data.values.slice(1)); // Skip the first item
     }
 
