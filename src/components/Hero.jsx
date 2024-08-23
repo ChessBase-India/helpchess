@@ -30,6 +30,7 @@ const HeroImage = styled.img`
   position: relative;
   width: 22.8125rem;
   height: 21.21563rem;
+  max-width: 60dvh;
   flex-shrink: 0;
 
   ${BREAK_POINTS.laptop`
@@ -107,7 +108,7 @@ const Hero = () => {
       <HeroImageContainer>
         <StyledCheckPattern />
         <HeroImage
-          src="/images/helpchess-praggnanandhaa.png"
+          src="/images/helpchess-hero.png"
           alt="Helpchess Hero Image"
         />
       </HeroImageContainer>
