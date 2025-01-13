@@ -385,7 +385,7 @@ export default function Home() {
           onClose={closeVideoModal}
         />
         <Hero />
-        <StatsSection>
+        <StatsSection id="about">
           <StatsCard
             title="raised"
             text="₹1cr+"
@@ -468,14 +468,14 @@ export default function Home() {
           ></ScrollButton>
         </ScrollButtonBox>
         <SectionNews>
-          <SectionTitle>Your support has changed lives.</SectionTitle>
+          <SectionTitle id="stories">Your support has changed lives.</SectionTitle>
           <SectionDescription>
             See how your contributions are helping many chess players.
           </SectionDescription>
           {/* ["Name", "Amount", "Description", "Month", "Link"] */}
           {articleLoadLimit && (
             <span className="articles">
-              {workItems.slice(1, articleLoadLimit).map((news) => (
+              {(workItems || []).slice(1, articleLoadLimit).map((news) => (
                 <NewsCard
                   title={news[0]}
                   amount={news[1]}
@@ -497,7 +497,7 @@ export default function Home() {
         </ImageBannerContainer>
 
         <SectionDonate>
-          <p className="title">Become a believer.</p>
+          <p className="title" id="donate">Become a believer.</p>
           <SectionDescription>
             Nurture chess talent to find the next great Indian chess player.
           </SectionDescription>
@@ -521,7 +521,7 @@ export default function Home() {
         </ImageBannerContainer>
 
         <SectionScholarship>
-          <p className="title">Helpchess Scholarship.</p>
+          <p className="title" id="scholarships">Helpchess Scholarship.</p>
           <SectionDescription>
             We support chess players from all over India.
           </SectionDescription>

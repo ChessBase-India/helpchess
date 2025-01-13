@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import Navbar from "../Navbar";
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -16,7 +17,7 @@ const Logo = styled.img`
 const Header = () => {
   return (
     <HeaderContainer>
-      <Logo src="/images/logo.png" />
+      <Navbar />
     </HeaderContainer>
   );
 };
