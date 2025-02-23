@@ -55,6 +55,9 @@ export default function Footer() {
         <a href="">
           <img src="/images/icons/social/twitter.png" alt="twitter-icon" />
         </a>
+        <a href="https://github.com/ChessBase-India">
+          <img src="/images/icons/social/github-mark.png" alt="github-mark" />
+        </a>
       </SocialIconContainer>
       <Title>CONTACT DETAILS</Title>
       <FooterText>contact@chessbase.in</FooterText>
