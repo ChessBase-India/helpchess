@@ -557,8 +557,9 @@ export default function Home() {
           <SectionDescription>
             Nurture chess talent to find the next great Indian chess player.
           </SectionDescription>
-          {donationCardContent.map((card) => (
+          {donationCardContent.map((card, index) => (
             <DonateNowCard
+              key={index}
               title={card.title}
               img={card.img}
               subtitle={card.subtitle}
