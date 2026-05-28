@@ -440,7 +440,7 @@ export default function Home() {
           href="/images/icons/favicon/android-chrome-512x512.png"
         />
       </Head>
-      <HomeContainer>
+      <HomeContainer id="about">
         <VideoModal
           videoId="_jPw8otX6Ts"
           isOpen={isVideoModalOpen}
@@ -517,7 +517,7 @@ export default function Home() {
             />
           </VideoContainer>
         </SectionVideo>
-        <SectionTestimonials>
+        <SectionTestimonials id="testimonials">
           <SectionTitle className="title">
             We are backed by legends.
           </SectionTitle>
@@ -545,7 +545,7 @@ export default function Home() {
             onClick={() => scrollRight({ type: "testimonials" })}
           ></ScrollButton>
         </ScrollButtonBox>
-        <SectionNews>
+        <SectionNews id="stories">
           <SectionTitle>Your support has changed lives.</SectionTitle>
           <SectionDescription>
             See how your contributions are helping many chess players.
@@ -612,7 +612,7 @@ export default function Home() {
           />
         </SectionScholarship>
 
-        <SectionWidgets>
+        <SectionWidgets id="widgets">
           <p className="title">Raise funds on your livestream.</p>
           <SectionDescription>
             Simply add our widgets on your livestream and help us reach out to
