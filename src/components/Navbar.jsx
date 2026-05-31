@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import RazorpayButton from "./RazorpayButton";
+import Link from "next/link";
 
 const routes = [
   { label: "about", id: "about" },
@@ -106,7 +107,8 @@ const CrossButton = styled.button`
 const MenuLink = styled.a`
   font-weight: 500;
   text-decoration: none;
-  color: #666666;
+  color: ${({ theme }) => theme.colors.primary};
+  scale: 1.01;
 
   @media (max-width: 768px) {
     padding: 1.25rem 2rem;
@@ -140,7 +142,9 @@ export default function Navbar() {
     <NavContainer className={`${isScrolled ? "scrolled" : ""}`}>
       <Hamburger onClick={() => setMenuOpen(true)}>☰</Hamburger>
 
-      <Logo src="/images/logo.png" />
+      <Link href="/">
+        <Logo src="/images/logo.png" />
+      </Link>
 
       <Menu open={menuOpen}>
         <MenuHeader>
