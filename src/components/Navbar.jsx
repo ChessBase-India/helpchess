@@ -7,7 +7,7 @@ const routes = [
   { label: "about", id: "about" },
   { label: "testimonials", id: "testimonials" },
   { label: "stories", id: "stories" },
-  { label: "links for Widgets/APIs", id: "widgets" },
+  { label: "links for Widgets/APIs", id: "widgets/APIs" },
 ];
 
 const NavContainer = styled.nav`
@@ -21,6 +21,7 @@ const NavContainer = styled.nav`
   position: relative;
   transition: box-shadow 0.3s ease-in-out;
   box-shadow: none;
+  text-transform: capitalize;
 
   @media (max-width: 768px) {
     justify-content: center;
