@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import RazorpayButton from "./RazorpayButton";
@@ -19,6 +19,8 @@ const NavContainer = styled.nav`
   height: 100%;
 
   position: relative;
+  transition: box-shadow 0.3s ease-in-out;
+  box-shadow: none;
 
   @media (max-width: 768px) {
     justify-content: center;
@@ -118,9 +120,23 @@ const ButtonWrapper = styled.div`
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 5) setIsScrolled(true);
+      else setIsScrolled(false);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
-    <NavContainer>
+    <NavContainer className={`${isScrolled ? "scrolled" : ""}`}>
       <Hamburger onClick={() => setMenuOpen(true)}>☰</Hamburger>
 
       <Logo src="/images/logo.png" />
