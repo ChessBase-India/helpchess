@@ -108,7 +108,18 @@ const MenuLink = styled.a`
   font-weight: 500;
   text-decoration: none;
   color: ${({ theme }) => theme.colors.primary};
-  scale: 1.01;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    text-decoration-color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-1px);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    opacity: 0.85;
+  }
 
   @media (max-width: 768px) {
     padding: 1.25rem 2rem;
