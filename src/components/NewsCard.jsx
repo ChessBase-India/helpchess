@@ -11,12 +11,18 @@ const ThumbnailWrapper = styled.div`
   z-index: 2;
 `;
 
+const CardLink = styled(Link)`
+  display: block;
+  width: min(22rem, 100%);
+  margin: 1rem;
+  text-decoration: none;
+`;
+
 const Card = styled.div`
   display: flex;
   flex-direction: column;
-  width: min(22rem, 100%);
+  width: 100%;
   aspect-ratio: 352 / 385;
-  margin: 1rem;
   border-radius: 10px;
   box-shadow: 2px 2px 6px 0px #00000040;
   position: relative;
@@ -126,8 +132,8 @@ export default function NewsCard({
     : month;
 
   return (
-    <Link href={link || "#"} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "block", width: "min(22rem, 100%)", margin: "1rem" }}>
-      <Card style={{ margin: 0, width: "100%" }}>
+    <CardLink href={link || "#"} target="_blank" rel="noopener noreferrer">
+      <Card>
         {thumbnail && (
           <ThumbnailWrapper>
             <Image src={thumbnail} alt={title} fill unoptimized style={{ objectFit: "cover" }} />
@@ -144,6 +150,6 @@ export default function NewsCard({
           <p className="description">{displayDescription}</p>
         </div>
       </Card>
-    </Link>
+    </CardLink>
   );
 }

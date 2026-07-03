@@ -377,9 +377,16 @@ export default function Home() {
     async function fetchReports() {
       setReportsLoading(true);
       try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+        if (!baseUrl) {
+          throw new Error("NEXT_PUBLIC_API_URL is not set");
+        }
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/v1/hc/reports?page=${reportsPage}&pageSize=${REPORTS_PAGE_SIZE}`,
+          `${baseUrl}/v1/hc/reports?page=${reportsPage}&pageSize=${REPORTS_PAGE_SIZE}`,
         );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reports (HTTP ${response.status})`);
+        }
         const result = await response.json();
         if (result.ok) {
           setAllReports((prev) =>
@@ -599,8 +606,9 @@ export default function Home() {
                 title="Load more"
                 secondary
                 onClick={() => {
+                  setReportsLoading(true);
                   setReportsPage((p) => p + 1);
-                  document.getElementById("stories")?.scrollIntoView({ behavior: "instant" });
+                  document.getElementById("stories")?.scrollIntoView({ behavior: "auto" });
                 }}
               ></Button>
             </LoadMoreWrapper>
