@@ -1,155 +1,113 @@
 import styled from "styled-components";
+import Button from "./Button";
 import Link from "next/link";
-import Image from "next/image";
-
-const THUMBNAIL_HEIGHT_RATIO = (184 / 385) * 100;
-
-const ThumbnailWrapper = styled.div`
-  width: 100%;
-  flex: 0 0 ${THUMBNAIL_HEIGHT_RATIO}%;
-  position: relative;
-  z-index: 2;
-`;
-
-const CardLink = styled(Link)`
-  display: block;
-  width: min(22rem, 100%);
-  margin: 1rem;
-  text-decoration: none;
-`;
+import CheckPattern from "./CheckPattern";
 
 const Card = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
-  aspect-ratio: 352 / 385;
+  gap: 1rem;
+  padding: 1rem;
+  margin: 1rem;
+  width: min(22rem, 100%);
+  aspect-ratio: 1;
+  box-shadow: 0px 4px 4px 0px #00000021;
+  border: 1px solid #99999999;
   border-radius: 10px;
-  box-shadow: 2px 2px 6px 0px #00000040;
   position: relative;
   overflow: hidden;
+  justify-content: space-between;
   z-index: 10;
-  background: linear-gradient(180deg, #fff9c1 0%, #fafafa 100%);
-  transition: all 300ms ease-out;
 
   * {
     z-index: 2;
   }
 
-  .content {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
-    padding: 1rem 1rem 1.5rem;
-    overflow: hidden;
-  }
-
-  .top-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.625rem;
-    flex-shrink: 0;
-  }
-
-  .date {
-    font-family: "Roboto", sans-serif;
-    font-weight: 400;
-    font-size: 0.875rem;
-    line-height: 100%;
-    color: #00000099;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .amount {
-    font-family: "Roboto", sans-serif;
-    font-weight: 700;
-    font-size: 0.875rem;
-    line-height: 100%;
-    text-align: right;
-    color: #6562fe;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .pattern {
+    position: absolute;
+    bottom: -10%;
+    right: -10%;
+    z-index: 1;
   }
 
   .description {
-    font-family: "Roboto", sans-serif;
-    font-weight: 400;
-    font-size: 1rem;
-    line-height: 1.4;
-    color: #000000b2;
-    flex-shrink: 0;
-    /* fixed to exactly 3 lines so overflow: hidden always cuts right at the
-       line-clamp boundary instead of mid-line when flex gave it an
-       arbitrary leftover height that wasn't a multiple of line-height */
-    height: calc(1.4em * 3);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  }
+
+  .date {
+    font-weight: bold;
+    color: #666666;
+    font-size: 0.8rem;
+  }
+
+  .amount {
+    color: #666666;
+    font-size: 0.8rem;
+    font-weight: bold;
   }
 
   h1 {
-    font-family: "Roboto", sans-serif;
-    font-weight: 700;
-    font-size: 1.25rem;
-    line-height: 100%;
-    color: #2b2b2b;
-    transition: color 300ms ease-out;
-    flex-shrink: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #6562fe;
+    font-size: 1.3rem;
   }
+`;
+
+const LoadMoreCard = styled(Card)`
+  background: #6562fe;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  letter-spacing: 1px;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
-    box-shadow: 4px 4px 6px 0px #00000040;
-  }
-
-  &:hover h1 {
+    background: white;
     color: #6562fe;
   }
 `;
 
+const TopSpan = styled.span`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
 export default function NewsCard({
   title,
-  subtitle,
-  date,
-  thumbnail,
   amount,
   description,
   month,
   link,
+  loadMore,
+  onClick,
 }) {
-  const displayDescription = subtitle || description;
-  const displayMonth = date
-    ? new Date(date).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
-    : month;
-
+  if (loadMore) {
+    return (
+      <LoadMoreCard onClick={onClick}>
+        <p>Load all</p>
+      </LoadMoreCard>
+    );
+  }
   return (
-    <CardLink href={link || "#"} target="_blank" rel="noopener noreferrer">
-      <Card>
-        {thumbnail && (
-          <ThumbnailWrapper>
-            <Image src={thumbnail} alt={title} fill unoptimized style={{ objectFit: "cover" }} />
-          </ThumbnailWrapper>
-        )}
-        <div className="content">
-          {(amount || displayMonth) && (
-            <div className="top-row">
-              {displayMonth && <span className="date">{displayMonth}</span>}
-              {amount && <span className="amount">{amount}</span>}
-            </div>
-          )}
-          <h1>{title}</h1>
-          <p className="description">{displayDescription}</p>
-        </div>
-      </Card>
-    </CardLink>
+    <Card>
+      <TopSpan>
+        <h1>{title}</h1>
+        <span>
+          <p className="amount">
+            {`${amount.slice(0, 2).toLowerCase() === "rs" ? " " : "₹"}` +
+              amount}{" "}
+            | <span className="date">{month}</span>
+          </p>
+        </span>
+
+        <p className="description">{description}</p>
+      </TopSpan>
+      <Link href={link} target="_blank">
+        <Button secondary title="Read more" h></Button>
+      </Link>
+
+      <CheckPattern className="pattern" />
+    </Card>
   );
 }
