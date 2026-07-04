@@ -18,6 +18,8 @@ import Button from "@/components/Button";
 import { BREAK_POINTS } from "@/styles/responsive";
 import { testimonials, donationCardContent } from "@/utils/constants";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+
 const HomeContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -377,7 +379,6 @@ export default function Home() {
     async function fetchReports() {
       setReportsLoading(true);
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
         if (!baseUrl) {
           throw new Error("NEXT_PUBLIC_API_URL is not set");
         }
@@ -412,7 +413,7 @@ export default function Home() {
     const fetchDonors = async () => {
       try {
         const response = await fetch(
-          "https://api-v2.chessbase.in/v1/hc/donors",
+          `${baseUrl}/v1/hc/donors`,
         );
         const result = await response.json();
         if (result.ok) {
