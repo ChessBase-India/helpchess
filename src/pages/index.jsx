@@ -18,7 +18,7 @@ import Button from "@/components/Button";
 import { BREAK_POINTS } from "@/styles/responsive";
 import { testimonials, donationCardContent } from "@/utils/constants";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+const initialArticleLoadLimit = 8;
 
 const HomeContainer = styled.div`
   display: flex;
@@ -171,7 +171,6 @@ const SectionNews = styled.section`
   align-items: center;
   gap: 2rem;
   margin-top: 2rem;
-  margin-bottom: 3rem;
   overflow-x: hidden;
   .articles {
     width: 100%;
@@ -181,13 +180,6 @@ const SectionNews = styled.section`
     flex-wrap: wrap;
     justify-content: center;
   }
-`;
-
-const LoadMoreWrapper = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
 `;
 
 const SectionDonate = styled.section`
@@ -333,11 +325,10 @@ const SectionWidgets = styled.section`
 export default function Home() {
   const [donors, setDonors] = useState([]);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [allReports, setAllReports] = useState([]);
-  const [reportsPage, setReportsPage] = useState(1);
-  const [reportsTotalPages, setReportsTotalPages] = useState(1);
-  const [reportsLoading, setReportsLoading] = useState(true);
-  const REPORTS_PAGE_SIZE = 9;
+  const [articleLoadLimit, setArticleLoadLimit] = useState(
+    initialArticleLoadLimit,
+  );
+  const [workItems, setWorkItems] = useState([]);
 
   const donationsScrollRef = useRef(null);
   const testimonialsScrollRef = useRef(null);
@@ -374,46 +365,23 @@ export default function Home() {
     }
   };
 
-
   useEffect(() => {
-    async function fetchReports() {
-      setReportsLoading(true);
-      try {
-        if (!baseUrl) {
-          throw new Error("NEXT_PUBLIC_API_URL is not set");
-        }
-        const response = await fetch(
-          `${baseUrl}/v1/hc/reports?page=${reportsPage}&pageSize=${REPORTS_PAGE_SIZE}`,
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch reports (HTTP ${response.status})`);
-        }
-        const result = await response.json();
-        if (result.ok) {
-          setAllReports((prev) =>
-            reportsPage === 1 ? result.data.reports : [...prev, ...result.data.reports],
-          );
-          setReportsTotalPages(result.data.totalPages || 1);
-        } else {
-          console.error("Error fetching reports:", result.msg);
-        }
-      } catch (error) {
-        console.error("Error fetching reports:", error);
-      } finally {
-        setReportsLoading(false);
-      }
+    async function fetchData() {
+      const response = await fetch(
+        "https://sheets.googleapis.com/v4/spreadsheets/1yo2GrCH9uD9DKmehh534IhS9NlR5FPlESjNZHvCadO0/values/Sheet1!A1:E700?key=AIzaSyDRpd7XCVIQsju4cmbb1GXXEoxV7mG1Nzw",
+      );
+      const data = await response.json();
+      setWorkItems(data.values);
     }
 
-    fetchReports();
-  }, [reportsPage]);
-
-  const reports = allReports;
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchDonors = async () => {
       try {
         const response = await fetch(
-          `${baseUrl}/v1/hc/donors`,
+          "https://api-v2.chessbase.in/v1/hc/donors",
         );
         const result = await response.json();
         if (result.ok) {
@@ -582,37 +550,22 @@ export default function Home() {
           <SectionDescription>
             See how your contributions are helping many chess players.
           </SectionDescription>
-          {reportsLoading ? (
-            <p>Loading...</p>
-          ) : reports.length === 0 ? (
-            <p>No reports yet.</p>
-          ) : (
+          {/* ["Name", "Amount", "Description", "Month", "Link"] */}
+          {articleLoadLimit && (
             <span className="articles">
-              {reports.map((report) => (
+              {workItems?.slice(1, articleLoadLimit).map((news) => (
                 <NewsCard
-                  key={report._id}
-                  title={report.title}
-                  amount={report.amount}
-                  description={report.subtitle}
-                  thumbnail={report.thumbnail}
-                  month={new Date(report.date).toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
-                  link={report.link}
-                />
+                  title={news[0]}
+                  amount={news[1]}
+                  description={news[2]}
+                  month={news[3]}
+                  link={news[4]}
+                ></NewsCard>
               ))}
+              {articleLoadLimit === initialArticleLoadLimit && (
+                <NewsCard loadMore onClick={() => setArticleLoadLimit(1000)} />
+              )}
             </span>
-          )}
-          {!reportsLoading && reportsPage < reportsTotalPages && (
-            <LoadMoreWrapper>
-              <Button
-                title="Load more"
-                secondary
-                onClick={() => {
-                  setReportsLoading(true);
-                  setReportsPage((p) => p + 1);
-                  document.getElementById("stories")?.scrollIntoView({ behavior: "auto" });
-                }}
-              ></Button>
-            </LoadMoreWrapper>
           )}
         </SectionNews>
         <ImageBannerContainer>
