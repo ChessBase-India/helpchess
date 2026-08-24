@@ -8,7 +8,6 @@ const routes = [
   { label: "about", id: "about" },
   { label: "testimonials", id: "testimonials" },
   { label: "stories", id: "stories" },
-  { label: "links for Widgets/APIs", id: "widgets/APIs" },
 ];
 
 const NavContainer = styled.nav`
