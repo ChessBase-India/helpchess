@@ -74,7 +74,8 @@ export default function Footer() {
         <b>CSR Number :</b> CSR00016763
       </FooterText>
       <FooterText>
-        Donations are eligible for deduction under Sec. 80-G of Income Tax Act.
+        Donations are eligible for deduction under Sec. 133 of the Income-tax
+        Act, 2025 (formerly Sec. 80-G of the Income Tax Act, 1961).
         80G No. AACTH4426KF20213(12A Registration - AACTH4426KE20215 dated
         23/09/2021)
       </FooterText>
