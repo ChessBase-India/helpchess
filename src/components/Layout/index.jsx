@@ -1,4 +1,3 @@
-import { Component } from "react";
 import styled from "styled-components";
 
 import Header from "./Header";
@@ -6,7 +5,11 @@ import Footer from "./Footer";
 import { RazorpayHost } from "@/components/RazorpayButton";
 import MobileDonateBar from "@/components/MobileDonateBar";
 
-const LayoutContainer = styled.div`
+const MainLayout = styled.div`
+  background: ${({ theme }) => theme.colors.background};
+`;
+
+const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15,22 +18,14 @@ const LayoutContainer = styled.div`
   min-height: 70vh;
 `;
 
-const MainLayout = styled.div`
-  background: ${({ theme }) => theme.colors.background};
-`;
-
-class Layout extends Component {
-  render() {
-    return (
-      <MainLayout>
-        <Header />
-        <LayoutContainer>{this.props.children}</LayoutContainer>
-        <Footer />
-        <RazorpayHost />
-        <MobileDonateBar />
-      </MainLayout>
-    );
-  }
+export default function Layout({ children }) {
+  return (
+    <MainLayout>
+      <Header />
+      <Content>{children}</Content>
+      <Footer />
+      <RazorpayHost />
+      <MobileDonateBar />
+    </MainLayout>
+  );
 }
-
-export default Layout;

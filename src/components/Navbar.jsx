@@ -72,7 +72,7 @@ const Menu = styled.div`
     align-items: stretch;
     gap: 0;
 
-    display: ${({ open }) => (open ? "flex" : "none")};
+    display: ${({ $open }) => ($open ? "flex" : "none")};
 
     z-index: 1000;
   }
@@ -158,21 +158,6 @@ const ButtonWrapper = styled.div`
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 5) setIsScrolled(true);
-      else setIsScrolled(false);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   useEffect(() => {
     if (!menuOpen) return;
     const onKeyDown = (e) => e.key === "Escape" && setMenuOpen(false);
@@ -185,7 +170,7 @@ export default function Navbar() {
   }, [menuOpen]);
 
   return (
-    <NavContainer className={`${isScrolled ? "scrolled" : ""}`}>
+    <NavContainer>
       <Hamburger
         type="button"
         aria-label="Open menu"
@@ -196,12 +181,12 @@ export default function Navbar() {
       </Hamburger>
 
       <Link href="/" aria-label="HelpChess home">
-        <Logo src="/images/logo.png" alt="HelpChess" />
+        <Logo src="/images/logo.png" alt="HelpChess" width={126} height={40} />
       </Link>
 
       <Backdrop $open={menuOpen} onClick={() => setMenuOpen(false)} />
 
-      <Menu open={menuOpen}>
+      <Menu $open={menuOpen}>
         <MenuHeader>
           <CrossButton
             type="button"
@@ -211,7 +196,12 @@ export default function Navbar() {
             ✕
           </CrossButton>
 
-          <Logo src="/images/logo.png" alt="HelpChess" />
+          <Logo
+            src="/images/logo.png"
+            alt="HelpChess"
+            width={126}
+            height={40}
+          />
         </MenuHeader>
 
         {routes.map((route) => (

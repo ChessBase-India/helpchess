@@ -116,21 +116,18 @@ const tidyAmount = (amount) =>
 
 export default function NewsCard({
   title,
-  subtitle,
   date,
   thumbnail,
   amount,
   description,
-  month,
   link,
 }) {
-  const displayDescription = subtitle || description;
-  const displayMonth = date
+  const month = date
     ? new Date(date).toLocaleDateString("en-IN", {
         month: "long",
         year: "numeric",
       })
-    : month;
+    : null;
 
   return (
     <CardLink href={link || "#"} target="_blank" rel="noopener noreferrer">
@@ -140,21 +137,20 @@ export default function NewsCard({
             src={thumbnail}
             alt=""
             fill
-            unoptimized
             sizes="(max-width: 768px) 100vw, 33vw"
             style={{ objectFit: "cover" }}
           />
         )}
       </Thumb>
       <Body>
-        {(amount || displayMonth) && (
+        {(amount || month) && (
           <div className="meta">
-            {displayMonth && <span className="date">{displayMonth}</span>}
+            {month && <span className="date">{month}</span>}
             {amount && <span className="amount">{tidyAmount(amount)}</span>}
           </div>
         )}
         <h3>{title}</h3>
-        <p className="description">{displayDescription}</p>
+        <p className="description">{description}</p>
         <p className="cta">
           Read story <span aria-hidden="true">→</span>
         </p>

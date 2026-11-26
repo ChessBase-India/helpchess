@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import styled from "styled-components";
 
 const CLAMP_LINES = 7;
@@ -121,7 +122,7 @@ export default function TestimonialCard({ image, description, title, name }) {
         )}
       </Quote>
       <Author>
-        <img src={image} alt={name} loading="lazy" />
+        <Image src={image} alt={name} width={52} height={52} />
         <div>
           <p className="name">{name}</p>
           <p className="title">{title}</p>
