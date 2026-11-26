@@ -1,7 +1,7 @@
 const CheckPattern = ({
   width = "247",
   height = "247",
-  primaryColor = "#FFF9C1",
+  primaryColor = "#FFE3C2",
   secondaryColor = "#FFFEFE",
   className,
 }) => (

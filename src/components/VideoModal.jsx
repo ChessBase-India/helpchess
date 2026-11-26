@@ -1,20 +1,22 @@
+import { useEffect } from "react";
 import styled from "styled-components";
 
 const Modal = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(14, 8, 36, 0.85);
+  backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  padding: 1rem;
+  z-index: 3000;
   pointer-events: all;
 `;
 
 const ModalContent = styled.div`
   position: relative;
-  padding: 20px;
-  border-radius: 8px;
+  padding-top: 1rem;
   pointer-events: all;
 `;
 
@@ -23,32 +25,57 @@ const CloseBtn = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  top: -3rem;
-  left: 50%;
-  background: #f0e68c;
-  padding: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  top: -3.5rem;
+  right: 0;
+  background: #fff;
+  color: #18122b;
   border-radius: 50%;
   border: none;
-  font-size: 2rem;
+  font-size: 1.75rem;
+  line-height: 1;
   cursor: pointer;
-  z-index: 2000;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: rotate(90deg);
+  }
 `;
 
 const ResponsiveIframe = styled.iframe`
-  width: 70vw;
-  height: 40%;
+  display: block;
+  width: min(70vw, 1100px);
+  height: auto;
   aspect-ratio: 16 / 9;
   border: none;
+  border-radius: 1rem;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+
+  @media (max-width: 768px) {
+    width: 92vw;
+  }
 `;
 const VideoModal = ({ videoId, isOpen, onClose }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e) => e.key === "Escape" && onClose();
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <Modal>
-      <ModalContent>
-        <CloseBtn onClick={onClose}>&times;</CloseBtn>
+    <Modal role="dialog" aria-modal="true" onClick={onClose}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <CloseBtn type="button" aria-label="Close video" onClick={onClose}>
+          &times;
+        </CloseBtn>
         <ResponsiveIframe
           width="inherit"
           height="inherit"

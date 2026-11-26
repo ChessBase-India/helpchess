@@ -15,12 +15,12 @@ const NavContainer = styled.nav`
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 2rem;
+  padding: 0 1.5rem;
   height: 100%;
+  max-width: ${({ theme }) => theme.maxWidth};
+  margin: 0 auto;
 
   position: relative;
-  transition: box-shadow 0.3s ease-in-out;
-  box-shadow: none;
   text-transform: capitalize;
 
   @media (max-width: 768px) {
@@ -29,8 +29,9 @@ const NavContainer = styled.nav`
 `;
 
 const Logo = styled.img`
-  width: 6.303rem;
-  height: 2rem;
+  display: block;
+  width: 7.25rem;
+  height: auto;
 `;
 
 const Hamburger = styled.button`
@@ -53,10 +54,11 @@ const Hamburger = styled.button`
 const Menu = styled.div`
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 0.25rem;
 
   @media (max-width: 768px) {
     position: fixed;
+    box-shadow: 8px 0 30px rgba(24, 18, 43, 0.2);
 
     top: 0;
     left: 0;
@@ -76,6 +78,18 @@ const Menu = styled.div`
   }
 `;
 
+const Backdrop = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: ${({ $open }) => ($open ? "block" : "none")};
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+  }
+`;
+
 const MenuHeader = styled.div`
   display: none;
 
@@ -88,7 +102,7 @@ const MenuHeader = styled.div`
 
     height: 80px;
 
-    border-bottom: 0.5px solid #999999;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   }
 `;
 
@@ -104,29 +118,40 @@ const CrossButton = styled.button`
 `;
 
 const MenuLink = styled.a`
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  height: 3.25rem;
+  padding: 0 1rem;
+  border-radius: 0.625rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   text-decoration: none;
-  color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.ink};
   transition:
-    transform 0.2s ease,
-    opacity 0.2s ease,
-    text-decoration-color 0.2s ease;
+    color 0.2s ease,
+    background-color 0.2s ease;
 
   &:hover,
   &:focus-visible {
-    transform: translateY(-1px);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-    opacity: 0.85;
+    color: ${({ theme }) => theme.colors.primary};
+    background-color: ${({ theme }) => theme.colors.primarySoft};
   }
 
   @media (max-width: 768px) {
-    padding: 1.25rem 2rem;
+    height: auto;
+    padding: 1.1rem 2rem;
+    border-radius: 0;
+    font-size: 1.0625rem;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   }
 `;
 
 const ButtonWrapper = styled.div`
+  margin-left: 0.75rem;
+
   @media (max-width: 768px) {
+    margin-left: 0;
     padding: 2rem;
   }
 `;
@@ -148,19 +173,45 @@ export default function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e) => e.key === "Escape" && setMenuOpen(false);
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
+
   return (
     <NavContainer className={`${isScrolled ? "scrolled" : ""}`}>
-      <Hamburger onClick={() => setMenuOpen(true)}>☰</Hamburger>
+      <Hamburger
+        type="button"
+        aria-label="Open menu"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen(true)}
+      >
+        ☰
+      </Hamburger>
 
-      <Link href="/">
-        <Logo src="/images/logo.png" />
+      <Link href="/" aria-label="HelpChess home">
+        <Logo src="/images/logo.png" alt="HelpChess" />
       </Link>
+
+      <Backdrop $open={menuOpen} onClick={() => setMenuOpen(false)} />
 
       <Menu open={menuOpen}>
         <MenuHeader>
-          <CrossButton onClick={() => setMenuOpen(false)}>✕</CrossButton>
+          <CrossButton
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+          >
+            ✕
+          </CrossButton>
 
-          <Logo src="/images/logo.png" />
+          <Logo src="/images/logo.png" alt="HelpChess" />
         </MenuHeader>
 
         {routes.map((route) => (
