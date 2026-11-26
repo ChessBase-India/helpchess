@@ -28,7 +28,6 @@ const theme = {
     lg: "0 18px 40px -12px rgba(60, 30, 140, 0.22)",
   },
   maxWidth: "1200px",
-  borderRadius: "20px",
 };
 
 export default theme;

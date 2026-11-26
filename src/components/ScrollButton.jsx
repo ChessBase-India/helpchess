@@ -33,6 +33,7 @@ export default function ScrollButton({ left = true, onClick, label }) {
       onClick={onClick}
       aria-label={label || (left ? "Scroll left" : "Scroll right")}
     >
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny static SVG, nothing to optimise */}
       <img src={`/images/icons/slide-${left ? `left` : `right`}.svg`} alt="" />
     </Button>
   );

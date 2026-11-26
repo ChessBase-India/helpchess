@@ -5,6 +5,7 @@ import CheckPattern from "@/components/CheckPattern";
 import RazorPayButton from "@/components/RazorpayButton";
 import { BREAK_POINTS } from "@/styles/responsive";
 import Button from "@/components/Button";
+import { SCHOLARSHIP_FORM_URL } from "@/utils/constants";
 
 const HeroContainer = styled.section`
   position: relative;
@@ -351,16 +352,22 @@ const Hero = () => {
             title="Apply for Scholarship"
             subtitle="For players in need"
             icon="/images/icons/plant-purple.svg"
-            onClick={(e) => {
-              e.preventDefault();
-              window.open("https://apply.so/form/WlUcUhs", "_blank");
-            }}
+            onClick={() =>
+              window.open(SCHOLARSHIP_FORM_URL, "_blank", "noopener,noreferrer")
+            }
           />
         </ButtonsContainer>
         <Trust>
           <div className="avatars">
             {SUPPORTERS.map((p) => (
-              <img key={p.name} src={p.src} alt={p.name} title={p.name} />
+              <Image
+                key={p.name}
+                src={p.src}
+                alt={p.name}
+                title={p.name}
+                width={36}
+                height={36}
+              />
             ))}
           </div>
           <p>
@@ -396,6 +403,7 @@ const Hero = () => {
         ))}
         <RaisedBadge aria-hidden="true">
           <span className="icon">
+            {/* eslint-disable-next-line @next/next/no-img-element -- tiny static SVG, nothing to optimise */}
             <img src="/images/icons/pawn.svg" alt="" />
           </span>
           <div>
