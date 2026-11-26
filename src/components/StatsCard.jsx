@@ -5,53 +5,73 @@ const StyledStatsCard = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-width: 7.5rem;
-  height: 8.5rem;
-  border-radius: 0.625rem;
+  flex: 1 0 9rem;
+  max-width: 14rem;
+  border-radius: 1rem;
   background: #fff;
-  box-shadow: 0px 1px 2px 0px rgba(96, 0, 252, 0.3);
-  gap: 1.2rem;
-  padding: 1rem;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+  gap: 0.9rem;
+  padding: 1.5rem 1rem;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: ${({ theme }) => theme.shadow.md};
+  }
 `;
 
-const Title = styled.p`
-  color: #1d1d1d;
-  text-align: center;
-  font-size: 0.75rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
+const IconWrap = styled.span`
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.875rem;
+  background: ${({ theme }) => theme.colors.primarySoft};
 `;
 
 const Icon = styled.img`
-  width: 2rem;
+  width: 1.5rem;
   aspect-ratio: 1/1;
-  flex-shrink: 0;
 `;
 
 const Text = styled.p`
-  color: #1d1d1d;
+  font-family: var(--font-heading), sans-serif;
+  color: ${({ theme }) => theme.colors.ink};
   text-align: center;
-  font-size: 1.5rem;
-  font-style: normal;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+`;
+
+const Title = styled.p`
+  color: ${({ theme }) => theme.colors.light};
+  text-align: center;
+  font-size: 0.75rem;
   font-weight: 600;
-  line-height: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 `;
 
 const TextContainer = styled.div`
   display: flex;
   flex-direction: column;
   text-align: center;
-  gap: 0.25rem;
+  gap: 0.4rem;
 `;
 
 const StatsCard = ({ title, img, text }) => {
   return (
     <StyledStatsCard>
-      <Icon src={img} alt="Stats card icon" />
+      <IconWrap>
+        <Icon src={img} alt="" />
+      </IconWrap>
       <TextContainer>
-        <Title>{title}</Title>
         <Text>{text}</Text>
+        <Title>{title}</Title>
       </TextContainer>
     </StyledStatsCard>
   );

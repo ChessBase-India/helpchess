@@ -4,15 +4,21 @@ import Navbar from "@/components/Navbar";
 
 const HeaderContainer = styled.header`
   width: 100%;
-  height: 4rem;
+  height: 4.5rem;
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: white;
-  .scrolled {
-    box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+
+  &:has(.scrolled) {
+    border-bottom-color: ${({ theme }) => theme.colors.border};
+    box-shadow: 0 6px 20px -12px rgba(24, 18, 43, 0.25);
   }
 `;
 

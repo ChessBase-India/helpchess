@@ -1,23 +1,28 @@
 import { ThemeProvider } from "styled-components";
-import { Roboto } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 
 import theme from "@/styles/theme";
 import GlobalStyles from "@/styles/globalStyles";
 import Layout from "@/components/Layout";
 
-const roboto = Roboto({
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-roboto",
+  variable: "--font-body",
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  weight: ["600", "700", "800"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-heading",
 });
 
 export default function App({ Component, pageProps }) {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <main className={`${roboto.className} ${roboto.variable}`}>
+      <main className={`${inter.variable} ${jakarta.variable}`}>
         <Layout>
           <Component {...pageProps} />
         </Layout>
