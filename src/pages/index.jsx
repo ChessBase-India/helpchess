@@ -1,6 +1,7 @@
 import Head from "next/head";
+import Image from "next/image";
 import styled from "styled-components";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Hero from "@/components/Hero";
 import StatsCard from "@/components/StatsCard";
@@ -15,9 +16,56 @@ import NewsCard, { NewsCardSkeleton } from "@/components/NewsCard";
 import Pagination from "@/components/Pagination";
 import SupportOrgCard from "@/components/SupportOrgCard";
 import { BREAK_POINTS } from "@/styles/responsive";
-import { testimonials, donationCardContent } from "@/utils/constants";
+import {
+  testimonials,
+  donationCardContent,
+  stats,
+  VIDEO_ID,
+} from "@/utils/constants";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const REPORTS_PAGE_SIZE = 9;
+const SCROLL_STEP = 500;
+
+const ytThumb = (quality) =>
+  `https://i.ytimg.com/vi/${VIDEO_ID}/${quality}.jpg`;
+
+const fetchJson = async (path) => {
+  if (!API_URL) throw new Error("NEXT_PUBLIC_API_URL is not set");
+  const response = await fetch(`${API_URL}${path}`);
+  if (!response.ok) throw new Error(`HTTP ${response.status} for ${path}`);
+  const result = await response.json();
+  if (!result.ok) throw new Error(result.msg || result.err || "API error");
+  return result.data;
+};
+
+const fetchDonors = () =>
+  fetchJson("/v1/hc/donors").then((data) => data.recentDonors ?? []);
+
+const fetchReports = (page) =>
+  fetchJson(`/v1/hc/reports?page=${page}&pageSize=${REPORTS_PAGE_SIZE}`).then(
+    (data) => ({
+      reports: data.reports ?? [],
+      totalPages: data.totalPages || 1,
+    }),
+  );
+
+// Pre-render donors and the first page of stories so they arrive with the HTML
+// (no pop-in), and refresh them in the background every 5 minutes.
+export async function getStaticProps() {
+  const [donors, firstPage] = await Promise.all([
+    fetchDonors().catch(() => []),
+    fetchReports(1).catch(() => ({ reports: [], totalPages: 1 })),
+  ]);
+  return {
+    props: {
+      initialDonors: donors,
+      initialReports: firstPage.reports,
+      initialTotalPages: firstPage.totalPages,
+    },
+    revalidate: 300,
+  };
+}
 
 const HomeContainer = styled.div`
   display: flex;
@@ -346,9 +394,8 @@ const StatusText = styled.p`
   text-align: center;
 `;
 
-const SectionDonate = styled.section`
+const CardsSection = styled.section`
   width: 100%;
-  height: fit-content;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -370,36 +417,7 @@ const SectionDonate = styled.section`
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
     gap: 1.5rem;
     width: calc(100% - 2rem);
-    max-width: 1100px;
-    margin-top: 1rem;
-  }
-`;
-
-const SectionScholarship = styled.section`
-  width: 100%;
-  height: fit-content;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  z-index: 10;
-
-  > .title {
-    font-family: var(--font-heading), sans-serif;
-    color: ${({ theme }) => theme.colors.primary};
-    font-size: ${({ theme }) => theme.fonts.size.heading};
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.15;
-    text-align: center;
-  }
-
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-    gap: 1.5rem;
-    width: calc(100% - 2rem);
-    max-width: 1100px;
+    max-width: ${({ $narrow }) => ($narrow ? "640px" : "1100px")};
     margin-top: 1rem;
   }
 `;
@@ -450,9 +468,9 @@ const SectionDonations = styled.div`
   scrollbar-width: none;
 `;
 
-const ImageBannerContainer = styled.span`
+const ImageBanner = styled.div`
   width: 100%;
-  max-height: 1000px;
+  height: clamp(260px, 45vw, 620px);
   position: relative;
   margin-top: 2rem;
 
@@ -471,12 +489,8 @@ const ImageBannerContainer = styled.span`
   }
 
   .banner {
-    display: block;
-    width: 100%;
-    height: clamp(260px, 45vw, 620px);
-    object-fit: cover;
     z-index: 10;
-    position: relative;
+    object-fit: cover;
   }
 `;
 
@@ -503,99 +517,57 @@ const SectionSupportOrg = styled.section`
   align-items: center;
 `;
 
-export default function Home() {
-  const [donors, setDonors] = useState([]);
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [allReports, setAllReports] = useState([]);
+export default function Home({
+  initialDonors,
+  initialReports,
+  initialTotalPages,
+}) {
+  const [donors, setDonors] = useState(initialDonors);
+  const [reports, setReports] = useState(initialReports);
   const [reportsPage, setReportsPage] = useState(1);
-  const [reportsTotalPages, setReportsTotalPages] = useState(1);
-  const [reportsLoading, setReportsLoading] = useState(true);
-  const REPORTS_PAGE_SIZE = 9;
+  const [reportsTotalPages, setReportsTotalPages] = useState(initialTotalPages);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   const donationsScrollRef = useRef(null);
   const testimonialsScrollRef = useRef(null);
 
+  const scrollRow = (ref, direction) =>
+    ref.current?.scrollBy({
+      left: direction * SCROLL_STEP,
+      behavior: "smooth",
+    });
+
   const openVideoModal = () => setIsVideoModalOpen(true);
-  const closeVideoModal = () => setIsVideoModalOpen(false);
 
-  const scrollRight = ({ type }) => {
-    if (type === "donations") {
-      if (donationsScrollRef.current) {
-        donationsScrollRef.current.scrollBy({ left: 500, behavior: "smooth" });
-        return;
-      }
-      return;
-    }
-    if (testimonialsScrollRef.current) {
-      testimonialsScrollRef.current.scrollBy({ left: 500, behavior: "smooth" });
-    }
-  };
-
-  const scrollLeft = ({ type }) => {
-    if (type === "donations") {
-      if (donationsScrollRef.current) {
-        donationsScrollRef.current.scrollBy({ left: -500, behavior: "smooth" });
-        return;
-      }
-      return;
-    }
-    if (testimonialsScrollRef.current) {
-      testimonialsScrollRef.current.scrollBy({
-        left: -500,
-        behavior: "smooth",
-      });
-    }
-  };
-
+  // the pre-rendered donor list can be a few minutes old — refresh it quietly
   useEffect(() => {
-    async function fetchReports() {
-      setReportsLoading(true);
-      try {
-        if (!baseUrl) {
-          throw new Error("NEXT_PUBLIC_API_URL is not set");
-        }
-        const response = await fetch(
-          `${baseUrl}/v1/hc/reports?page=${reportsPage}&pageSize=${REPORTS_PAGE_SIZE}`,
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch reports (HTTP ${response.status})`);
-        }
-        const result = await response.json();
-        if (result.ok) {
-          setAllReports(result.data.reports);
-          setReportsTotalPages(result.data.totalPages || 1);
-        } else {
-          console.error("Error fetching reports:", result.msg);
-        }
-      } catch (error) {
-        console.error("Error fetching reports:", error);
-      } finally {
-        setReportsLoading(false);
-      }
-    }
-
-    fetchReports();
-  }, [reportsPage]);
-
-  const reports = allReports;
-
-  useEffect(() => {
-    const fetchDonors = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/v1/hc/donors`);
-        const result = await response.json();
-        if (result.ok) {
-          setDonors(result.data.recentDonors);
-        } else {
-          console.error("Error fetching donors:", result.err);
-        }
-      } catch (error) {
-        console.error("Error fetching donors:", error);
-      }
-    };
-
-    fetchDonors();
+    fetchDonors()
+      .then((latest) => latest.length && setDonors(latest))
+      .catch((error) => console.error("Error fetching donors:", error));
   }, []);
+
+  // page 1 comes from getStaticProps; fetch the others on demand
+  useEffect(() => {
+    if (reportsPage === 1 && initialReports.length) {
+      setReports(initialReports);
+      return;
+    }
+    let cancelled = false;
+    setReportsLoading(true);
+    fetchReports(reportsPage)
+      .then((result) => {
+        if (cancelled) return;
+        setReports(result.reports);
+        setReportsTotalPages(result.totalPages);
+      })
+      .catch((error) => console.error("Error fetching reports:", error))
+      .finally(() => !cancelled && setReportsLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [reportsPage, initialReports]);
+
   return (
     <>
       <Head>
@@ -605,77 +577,28 @@ export default function Home() {
           content="Helpchess is on a mission to support 1000 Indian chess players to reach their goals!"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/images/icons/favicon/favicon.ico" />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/images/icons/favicon/favicon-16x16.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/images/icons/favicon/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="96x96"
-          href="/images/icons/favicon/favicon-96x96.png"
-        />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/images/icons/favicon/apple-touch-icon.png"
-        />
-        <link
-          rel="android-chrome"
-          sizes="192x192"
-          href="/images/icons/favicon/android-chrome-192x192.png"
-        />
-        <link
-          rel="android-chrome"
-          sizes="512x512"
-          href="/images/icons/favicon/android-chrome-512x512.png"
-        />
       </Head>
       <HomeContainer id="about">
         <VideoModal
-          videoId="_jPw8otX6Ts"
+          videoId={VIDEO_ID}
           isOpen={isVideoModalOpen}
-          onClose={closeVideoModal}
+          onClose={() => setIsVideoModalOpen(false)}
         />
         <Hero />
         <StatsSection>
-          <StatsCard
-            title="raised"
-            text="₹3cr+"
-            img="/images/icons/gift.svg"
-          ></StatsCard>
-          <StatsCard
-            title="believers"
-            text="4K+"
-            img="/images/icons/star.svg"
-          ></StatsCard>
-          <StatsCard
-            title="players"
-            text="70+"
-            img="/images/icons/pawn.svg"
-          ></StatsCard>
-          <StatsCard
-            title="big believers"
-            text="50"
-            img="/images/icons/star-big.svg"
-          ></StatsCard>
+          {stats.map((stat) => (
+            <StatsCard key={stat.title} {...stat} />
+          ))}
         </StatsSection>
         {donors.length > 0 && (
           <>
             <SectionDonationsWrapper>
+              {/* eslint-disable-next-line @next/next/no-img-element -- tiny static SVG, nothing to optimise */}
               <img
                 src="/images/icons/confetti.svg"
-                style={{ width: "3.5rem", aspectRatio: "1" }}
-                alt="confetti"
+                width={56}
+                height={56}
+                alt=""
               />
               <SectionTitle>Latest donors</SectionTitle>
               <SectionDescription>
@@ -695,13 +618,13 @@ export default function Home() {
             <ScrollButtonBox>
               <ScrollButton
                 label="Previous donors"
-                onClick={() => scrollLeft({ type: "donations" })}
-              ></ScrollButton>
+                onClick={() => scrollRow(donationsScrollRef, -1)}
+              />
               <ScrollButton
                 left={false}
                 label="Next donors"
-                onClick={() => scrollRight({ type: "donations" })}
-              ></ScrollButton>
+                onClick={() => scrollRow(donationsScrollRef, 1)}
+              />
             </ScrollButtonBox>
           </>
         )}
@@ -725,9 +648,10 @@ export default function Home() {
               aria-label="Play video: HelpChess, ChessBase India Foundation"
               onClick={openVideoModal}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element -- YouTube serves its own sized thumbnails via srcSet */}
               <img
-                src="https://i.ytimg.com/vi/_jPw8otX6Ts/maxresdefault.jpg"
-                srcSet="https://i.ytimg.com/vi/_jPw8otX6Ts/hqdefault.jpg 480w, https://i.ytimg.com/vi/_jPw8otX6Ts/sddefault.jpg 640w, https://i.ytimg.com/vi/_jPw8otX6Ts/maxresdefault.jpg 1280w"
+                src={ytThumb("maxresdefault")}
+                srcSet={`${ytThumb("hqdefault")} 480w, ${ytThumb("sddefault")} 640w, ${ytThumb("maxresdefault")} 1280w`}
                 sizes="(min-width: 900px) 620px, 92vw"
                 alt="HelpChess — ChessBase India Foundation video"
                 loading="lazy"
@@ -755,7 +679,7 @@ export default function Home() {
                 description={testimonial.description}
                 title={testimonial.title}
                 image={testimonial.image}
-                key={`testimonial ${testimonial.name}`}
+                key={testimonial.name}
               />
             ))}
           </TestimonialCardsWrapper>
@@ -763,26 +687,26 @@ export default function Home() {
         <ScrollButtonBox>
           <ScrollButton
             label="Previous testimonials"
-            onClick={() => scrollLeft({ type: "testimonials" })}
-          ></ScrollButton>
+            onClick={() => scrollRow(testimonialsScrollRef, -1)}
+          />
           <ScrollButton
             left={false}
             label="Next testimonials"
-            onClick={() => scrollRight({ type: "testimonials" })}
-          ></ScrollButton>
+            onClick={() => scrollRow(testimonialsScrollRef, 1)}
+          />
         </ScrollButtonBox>
         <SectionNews id="stories">
           <SectionTitle>Your support has changed lives</SectionTitle>
           <SectionDescription>
             See how your contributions are helping many chess players.
           </SectionDescription>
-          {reportsLoading && reports.length === 0 ? (
+          {reportsLoading && !reports.length ? (
             <div className="articles" aria-busy="true">
               {Array.from({ length: 6 }, (_, i) => (
                 <NewsCardSkeleton key={i} />
               ))}
             </div>
-          ) : reports.length === 0 ? (
+          ) : !reports.length ? (
             <StatusText>No stories yet.</StatusText>
           ) : (
             <div
@@ -815,55 +739,51 @@ export default function Home() {
             }}
           />
         </SectionNews>
-        <ImageBannerContainer>
+        <ImageBanner>
           <CheckPattern className="pattern-top" />
           <CheckPattern className="pattern-bottom" />
-          <img
+          <Image
             className="banner"
             src="/images/chess-players-banner.jpeg"
             alt="Chess players supported by HelpChess"
-            loading="lazy"
+            fill
+            sizes="100vw"
           />
-        </ImageBannerContainer>
+        </ImageBanner>
 
-        <SectionDonate>
+        <CardsSection>
           <p className="title">Become a believer</p>
           <SectionDescription>
             Nurture chess talent to find the next great Indian chess player.
           </SectionDescription>
           <div className="cards">
-            {donationCardContent.map((card, index) => (
-              <DonateNowCard
-                key={index}
-                title={card.title}
-                img={card.img}
-                subtitle={card.subtitle}
-                description={card.description}
-              />
+            {donationCardContent.map((card) => (
+              <DonateNowCard key={card.title} {...card} />
             ))}
           </div>
-        </SectionDonate>
+        </CardsSection>
         <SectionSupportOrg>
           <SupportOrgCard />
         </SectionSupportOrg>
 
-        <ImageBannerContainer>
+        <ImageBanner>
           <CheckPattern className="pattern-top" />
           <CheckPattern className="pattern-bottom" />
-          <img
+          <Image
             className="banner"
             src="/images/banner-last.jpeg"
             alt="Young chess players at a tournament"
-            loading="lazy"
+            fill
+            sizes="100vw"
           />
-        </ImageBannerContainer>
+        </ImageBanner>
 
-        <SectionScholarship>
+        <CardsSection $narrow>
           <p className="title">Helpchess Scholarship</p>
           <SectionDescription>
             We support chess players from all over India.
           </SectionDescription>
-          <div className="cards" style={{ maxWidth: "640px" }}>
+          <div className="cards">
             <ApplyForScholarshipCard
               title="Apply for a scholarship"
               img="/images/scholarship.jpeg"
@@ -871,7 +791,7 @@ export default function Home() {
               description="We support chess players from all over India."
             />
           </div>
-        </SectionScholarship>
+        </CardsSection>
       </HomeContainer>
     </>
   );

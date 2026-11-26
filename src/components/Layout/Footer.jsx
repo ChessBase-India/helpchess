@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import styled from "styled-components";
 
 const socialLinks = [
@@ -236,7 +237,7 @@ export default function Footer() {
                 aria-label={name}
                 title={name}
               >
-                <img src={icon} alt="" />
+                <Image src={icon} alt="" width={18} height={18} />
               </a>
             ))}
           </SocialIconContainer>
