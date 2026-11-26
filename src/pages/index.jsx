@@ -677,7 +677,7 @@ export default function Home() {
                 style={{ width: "3.5rem", aspectRatio: "1" }}
                 alt="confetti"
               />
-              <SectionTitle>Latest donors.</SectionTitle>
+              <SectionTitle>Latest donors</SectionTitle>
               <SectionDescription>
                 Thank you for your contribution.
               </SectionDescription>
@@ -711,7 +711,7 @@ export default function Home() {
           <VideoContainer>
             <div className="text">
               <p className="eyebrow">Watch our story</p>
-              <p className="title">We are on a mission.</p>
+              <p className="title">We are on a mission</p>
               <p className="description">
                 Join us in supporting 1000 Indian chess players to reach their
                 goals.
@@ -743,7 +743,7 @@ export default function Home() {
         </SectionVideo>
         <SectionTestimonials id="testimonials">
           <SectionTitle className="title">
-            We are backed by legends.
+            We are backed by legends
           </SectionTitle>
           <SectionDescription>
             Hear what some of our supporters have to say about us.
@@ -772,7 +772,7 @@ export default function Home() {
           ></ScrollButton>
         </ScrollButtonBox>
         <SectionNews id="stories">
-          <SectionTitle>Your support has changed lives.</SectionTitle>
+          <SectionTitle>Your support has changed lives</SectionTitle>
           <SectionDescription>
             See how your contributions are helping many chess players.
           </SectionDescription>
@@ -827,7 +827,7 @@ export default function Home() {
         </ImageBannerContainer>
 
         <SectionDonate>
-          <p className="title">Become a believer.</p>
+          <p className="title">Become a believer</p>
           <SectionDescription>
             Nurture chess talent to find the next great Indian chess player.
           </SectionDescription>
@@ -859,7 +859,7 @@ export default function Home() {
         </ImageBannerContainer>
 
         <SectionScholarship>
-          <p className="title">Helpchess Scholarship.</p>
+          <p className="title">Helpchess Scholarship</p>
           <SectionDescription>
             We support chess players from all over India.
           </SectionDescription>
