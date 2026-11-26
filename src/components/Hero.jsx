@@ -338,7 +338,7 @@ const Hero = () => {
       <HeroTextContainer>
         <Eyebrow>ChessBase India Foundation</Eyebrow>
         <HeroTitle>
-          You can power <span>Indian Chess.</span>
+          You can power <span>Indian Chess</span>
         </HeroTitle>
         <HeroDescription>
           Join India’s largest chess charity in our mission of supporting 1000

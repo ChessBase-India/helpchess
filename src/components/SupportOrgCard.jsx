@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "styled-components";
 
 import Button from "./Button";
@@ -32,29 +33,40 @@ const SupportCard = styled.div`
     color: ${({ theme }) => theme.colors.light};
   }
 
-  a {
-    text-decoration: none;
-  }
-
   strong {
     color: ${({ theme }) => theme.colors.primary};
     font-weight: 600;
   }
 `;
 
+const EMAIL = "contact@chessbase.in";
+
 export default function SupportOrgCard() {
+  const [copied, setCopied] = useState(false);
+
   return (
     <SupportCard>
       <div className="text">
         <h3 className="title">Support as an organisation</h3>
         <p>
-          If you are a brand and want to partner with us, please reach out to
-          us at <strong>contact@chessbase.in</strong>
+          If you are a brand and want to partner with us, please reach out to us
+          at <strong>contact@chessbase.in</strong>
         </p>
       </div>
-      <a href="mailto:contact@chessbase.in" tabIndex={-1}>
-        <Button secondary title="Contact us" />
-      </a>
+      <Button
+        secondary
+        title={copied ? "Copied!" : "Copy email"}
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(EMAIL);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1800);
+          } catch {
+            // clipboard unavailable — fall back to opening the mail app
+            window.location.href = `mailto:${EMAIL}`;
+          }
+        }}
+      />
     </SupportCard>
   );
 }
