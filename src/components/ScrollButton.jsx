@@ -1,14 +1,24 @@
 import styled from "styled-components";
 
 const Button = styled.button`
-  width: 4rem;
+  width: 3rem;
   aspect-ratio: 1;
-  box-shadow: 0px 3.23px 6.46px 0px #00000040;
+  border: 1px solid rgba(91, 46, 232, 0.18);
   border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 
   img {
     width: 45%;
@@ -16,13 +26,14 @@ const Button = styled.button`
   }
 `;
 
-export default function ScrollButton({ left = true, onClick }) {
+export default function ScrollButton({ left = true, onClick, label }) {
   return (
-    <Button onClick={onClick}>
-      <img
-        src={`/images/icons/slide-${left ? `left` : `right`}.svg`}
-        alt={`donation-slide-${left ? `left` : `right`}`}
-      />
+    <Button
+      type="button"
+      onClick={onClick}
+      aria-label={label || (left ? "Scroll left" : "Scroll right")}
+    >
+      <img src={`/images/icons/slide-${left ? `left` : `right`}.svg`} alt="" />
     </Button>
   );
 }

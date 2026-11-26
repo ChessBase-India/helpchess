@@ -1,6 +1,5 @@
 import Head from "next/head";
 import styled from "styled-components";
-import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 
 import Hero from "@/components/Hero";
@@ -12,9 +11,9 @@ import CheckPattern from "@/components/CheckPattern";
 import DonationCard from "@/components/DonationsCard";
 import ScrollButton from "@/components/ScrollButton";
 import VideoModal from "@/components/VideoModal";
-import NewsCard from "@/components/NewsCard";
+import NewsCard, { NewsCardSkeleton } from "@/components/NewsCard";
+import Pagination from "@/components/Pagination";
 import SupportOrgCard from "@/components/SupportOrgCard";
-import Button from "@/components/Button";
 import { BREAK_POINTS } from "@/styles/responsive";
 import { testimonials, donationCardContent } from "@/utils/constants";
 
@@ -25,19 +24,25 @@ const HomeContainer = styled.div`
   flex-direction: column;
   width: 100%;
   min-height: 100dvh;
-  gap: 2.5rem;
+  gap: clamp(3.5rem, 7vw, 6rem);
 `;
 
 const StatsSection = styled.section`
   display: flex;
   align-items: center;
-  height: 13.5rem;
-  width: 100%;
-  border-radius: 0.9375rem;
-  background: linear-gradient(105deg, #fff9c1 58.95%, #fff 100%);
-  gap: 0.44rem;
+  width: calc(100% - 2rem);
+  max-width: ${({ theme }) => theme.maxWidth};
+  margin: 0 auto;
+  border-radius: 1.5rem;
+  background: linear-gradient(
+    105deg,
+    ${({ theme }) => theme.colors.surface} 40%,
+    ${({ theme }) => theme.colors.surfaceEnd} 100%
+  );
+  border: 1px solid ${({ theme }) => theme.colors.surfaceBorder};
+  gap: 1rem;
   overflow-x: auto;
-  padding: 0 1rem;
+  padding: 2rem 1.5rem;
   justify-content: safe center;
 
   /* For browsers that don't support safe values */
@@ -55,17 +60,27 @@ const StatsSection = styled.section`
 
   -ms-overflow-style: none;
   scrollbar-width: none;
+
+  @media (max-width: 640px) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    overflow: visible;
+
+    & > * {
+      max-width: none;
+    }
+  }
 `;
 
-const SectionVideo = styled.section`0
+const SectionVideo = styled.section`
   width: 100%;
   height: fit-content;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-top: 3rem;
-  margin-bottom: 3rem;
 
   .pattern-top {
     position: absolute;
@@ -82,56 +97,169 @@ const SectionVideo = styled.section`0
 `;
 
 const VideoContainer = styled.div`
-  width: calc(100% - 2rem);
-  height: 600px;
-  background-image: url(/images/vishy.jpeg);
-  background-repeat: no-repeat;
-  background-size: cover;
-  border-radius: ${({ theme }) => theme.borderRadius};
-  color: #ffffff;
-  box-shadow: inset 0 0 0 1000px rgba(21, 19, 93, 0.5);
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  padding: 2rem 1rem;
-  z-index: 2;
   position: relative;
+  z-index: 2;
+  width: calc(100% - 2rem);
+  max-width: ${({ theme }) => theme.maxWidth};
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 1.75rem;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  border-radius: 1.5rem;
+  color: #fff;
+  background: radial-gradient(
+      circle at 85% 15%,
+      rgba(124, 77, 255, 0.45),
+      transparent 55%
+    ),
+    linear-gradient(135deg, #1c1245 0%, #2f1a8a 100%);
+  overflow: hidden;
 
-  .play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 42px;
-    aspect-ratio: 1;
-    cursor: pointer;
+  @media (min-width: 900px) {
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 3rem;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .eyebrow {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c9b8ff;
   }
 
   .title {
-    width: 15rem;
-    font-weight: 700;
-    font-size: 32px;
-    line-height: 37.5px;
+    font-family: var(--font-heading), sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
   }
 
   .description {
-    width: 15rem;
+    max-width: 24rem;
+    font-size: 1.0625rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .watch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: #fff;
+
+    span {
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover span {
+      transform: translateX(3px);
+    }
   }
 `;
 
-const SectionTitle = styled.h1`
+const VideoThumb = styled.button`
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* the thumbnail has a thin black frame baked in — crop it off */
+    transform: scale(1.06);
+    transition: transform 0.5s ease;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 6, 30, 0.25);
+    transition: background-color 0.3s ease;
+  }
+
+  .play {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 50%;
+    width: clamp(3.5rem, 8vw, 4.75rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    color: ${({ theme }) => theme.colors.primary};
+    transform: translate(-50%, -50%);
+    transition: transform 0.25s ease;
+
+    svg {
+      width: 42%;
+      height: 42%;
+      margin-left: 8%;
+    }
+  }
+
+  .duration {
+    position: absolute;
+    z-index: 1;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.375rem;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  &:hover img {
+    transform: scale(1.09);
+  }
+
+  &:hover::after {
+    background: rgba(10, 6, 30, 0.1);
+  }
+
+  &:hover .play,
+  &:focus-visible .play {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+`;
+
+const SectionTitle = styled.h2`
   font-size: ${({ theme }) => theme.fonts.size.heading};
   font-weight: ${({ theme }) => theme.fonts.weight.heading};
-  color: #6562fe;
+  color: ${({ theme }) => theme.colors.primary};
   text-align: center;
-  margin: 0 32px;
+  margin: 0 1.5rem;
 `;
 
 const SectionDescription = styled.p`
   text-align: center;
   color: ${({ theme }) => theme.colors.light};
-  margin: 0 32px;
-  width: min(20rem, 100%);
+  font-size: 1.0625rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  width: min(32rem, 100%);
 `;
 
 const SectionTestimonials = styled.section`
@@ -149,10 +277,15 @@ const TestimonialCardsWrapper = styled.div`
   display: flex;
   width: 100%;
   flex-direction: row;
-  gap: 1rem;
+  gap: 1.25rem;
   height: fit-content;
-  padding: 1rem;
+  padding: 1rem max(1rem, calc((100% - ${({ theme }) => theme.maxWidth}) / 2));
+  scroll-padding-inline: max(
+    1rem,
+    calc((100% - ${({ theme }) => theme.maxWidth}) / 2)
+  );
   overflow-x: scroll;
+  scroll-snap-type: x proximity;
   -ms-overflow-style: none;
   scrollbar-width: none;
 
@@ -169,25 +302,48 @@ const SectionNews = styled.section`
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
-  margin-top: 2rem;
-  margin-bottom: 3rem;
-  overflow-x: hidden;
+  gap: 1rem;
+
   .articles {
-    width: 100%;
-    height: fit-content;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+    width: calc(100% - 2rem);
+    max-width: ${({ theme }) => theme.maxWidth};
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    transition: opacity 0.2s ease;
+  }
+
+  .articles[aria-busy="true"] {
+    opacity: 0.5;
+  }
+
+  @media (max-width: 640px) {
+    .articles {
+      display: flex;
+      width: 100%;
+      gap: 0.875rem;
+      padding: 0.25rem 1rem 0.75rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: 1rem;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      & > * {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+      }
+    }
   }
 `;
 
-const LoadMoreWrapper = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
+const StatusText = styled.p`
+  color: ${({ theme }) => theme.colors.light};
+  text-align: center;
 `;
 
 const SectionDonate = styled.section`
@@ -199,13 +355,23 @@ const SectionDonate = styled.section`
   gap: 1rem;
   z-index: 10;
 
-  .title {
-    color: #6000fc;
-    font-size: 2.5rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 110%;
+  > .title {
+    font-family: var(--font-heading), sans-serif;
+    color: ${({ theme }) => theme.colors.primary};
+    font-size: ${({ theme }) => theme.fonts.size.heading};
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
     text-align: center;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: 1.5rem;
+    width: calc(100% - 2rem);
+    max-width: 1100px;
+    margin-top: 1rem;
   }
 `;
 
@@ -218,13 +384,23 @@ const SectionScholarship = styled.section`
   gap: 1rem;
   z-index: 10;
 
-  .title {
-    color: #6000fc;
-    font-size: 2.5rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 110%;
+  > .title {
+    font-family: var(--font-heading), sans-serif;
+    color: ${({ theme }) => theme.colors.primary};
+    font-size: ${({ theme }) => theme.fonts.size.heading};
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
     text-align: center;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: 1.5rem;
+    width: calc(100% - 2rem);
+    max-width: 1100px;
+    margin-top: 1rem;
   }
 `;
 
@@ -243,9 +419,28 @@ const SectionDonations = styled.div`
   width: 100%;
   height: fit-content;
   overflow-x: scroll;
+  scroll-snap-type: x proximity;
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.875rem;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 3%,
+    #000 97%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 3%,
+    #000 97%,
+    transparent
+  );
+  padding: 1rem max(1rem, calc((100% - ${({ theme }) => theme.maxWidth}) / 2));
+  scroll-padding-inline: max(
+    1rem,
+    calc((100% - ${({ theme }) => theme.maxWidth}) / 2)
+  );
 
   &::-webkit-scrollbar {
     display: none;
@@ -276,8 +471,9 @@ const ImageBannerContainer = styled.span`
   }
 
   .banner {
+    display: block;
     width: 100%;
-    max-height: 1000px;
+    height: clamp(260px, 45vw, 620px);
     object-fit: cover;
     z-index: 10;
     position: relative;
@@ -288,6 +484,9 @@ const ScrollButtonBox = styled.span`
   display: flex;
   gap: 1rem;
   justify-content: end;
+  width: 100%;
+  max-width: calc(${({ theme }) => theme.maxWidth} + 2rem);
+  margin: calc(-1 * clamp(3.5rem, 7vw, 6rem) + 0.75rem) auto 0;
   padding: 0 1rem;
 
   ${BREAK_POINTS.mobile`
@@ -302,32 +501,6 @@ const SectionSupportOrg = styled.section`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-`;
-
-const SectionWidgets = styled.section`
-  width: 100%;
-  height: fit-content;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  gap: 2rem;
-  margin-bottom: 5rem;
-
-  .title {
-    color: #6000fc;
-    font-size: 2.5rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 110%;
-    text-align: center;
-    width: min(30rem, 100%);
-  }
-
-  .description {
-    width: min(30rem, 100%);
-  }
 `;
 
 export default function Home() {
@@ -374,7 +547,6 @@ export default function Home() {
     }
   };
 
-
   useEffect(() => {
     async function fetchReports() {
       setReportsLoading(true);
@@ -390,9 +562,7 @@ export default function Home() {
         }
         const result = await response.json();
         if (result.ok) {
-          setAllReports((prev) =>
-            reportsPage === 1 ? result.data.reports : [...prev, ...result.data.reports],
-          );
+          setAllReports(result.data.reports);
           setReportsTotalPages(result.data.totalPages || 1);
         } else {
           console.error("Error fetching reports:", result.msg);
@@ -412,9 +582,7 @@ export default function Home() {
   useEffect(() => {
     const fetchDonors = async () => {
       try {
-        const response = await fetch(
-          `${baseUrl}/v1/hc/donors`,
-        );
+        const response = await fetch(`${baseUrl}/v1/hc/donors`);
         const result = await response.json();
         if (result.ok) {
           setDonors(result.data.recentDonors);
@@ -501,52 +669,76 @@ export default function Home() {
             img="/images/icons/star-big.svg"
           ></StatsCard>
         </StatsSection>
-        <SectionDonationsWrapper>
-          <img
-            src="/images/icons/confetti.svg"
-            style={{ width: "3.5rem", aspectRatio: "1" }}
-            alt="confetti"
-          />
-          <SectionTitle>Latest donors.</SectionTitle>
-          <SectionDescription>
-            Thank you for your contribution.
-          </SectionDescription>
-          <SectionDonations ref={donationsScrollRef}>
-            {donors.map((donor) => (
-              <DonationCard
-                name={donor.name}
-                amount={donor.amount}
-                key={donor.id}
+        {donors.length > 0 && (
+          <>
+            <SectionDonationsWrapper>
+              <img
+                src="/images/icons/confetti.svg"
+                style={{ width: "3.5rem", aspectRatio: "1" }}
+                alt="confetti"
               />
-            ))}
-          </SectionDonations>
-        </SectionDonationsWrapper>
-        <ScrollButtonBox>
-          <ScrollButton
-            onClick={() => scrollLeft({ type: "donations" })}
-          ></ScrollButton>
-          <ScrollButton
-            left={false}
-            onClick={() => scrollRight({ type: "donations" })}
-          ></ScrollButton>
-        </ScrollButtonBox>
+              <SectionTitle>Latest donors.</SectionTitle>
+              <SectionDescription>
+                Thank you for your contribution.
+              </SectionDescription>
+              <SectionDonations ref={donationsScrollRef}>
+                {donors.map((donor) => (
+                  <DonationCard
+                    name={donor.name}
+                    amount={donor.amount}
+                    date={donor.date}
+                    key={donor.id}
+                  />
+                ))}
+              </SectionDonations>
+            </SectionDonationsWrapper>
+            <ScrollButtonBox>
+              <ScrollButton
+                label="Previous donors"
+                onClick={() => scrollLeft({ type: "donations" })}
+              ></ScrollButton>
+              <ScrollButton
+                left={false}
+                label="Next donors"
+                onClick={() => scrollRight({ type: "donations" })}
+              ></ScrollButton>
+            </ScrollButtonBox>
+          </>
+        )}
         <SectionVideo>
           <CheckPattern className="pattern-top" />
           <CheckPattern className="pattern-bottom" />
           <VideoContainer>
-            <p className="title">We are on a mission.</p>
-            <p className="description">
-              Join us in supporting 1000 Indian chess players to reach their
-              goals.
-            </p>
-            <Image
-              className="play"
-              src="/images/icons/play-button.png"
-              alt="play button"
-              height={42}
-              width={42}
+            <div className="text">
+              <p className="eyebrow">Watch our story</p>
+              <p className="title">We are on a mission.</p>
+              <p className="description">
+                Join us in supporting 1000 Indian chess players to reach their
+                goals.
+              </p>
+              <button type="button" className="watch" onClick={openVideoModal}>
+                Watch the video <span aria-hidden="true">→</span>
+              </button>
+            </div>
+            <VideoThumb
+              type="button"
+              aria-label="Play video: HelpChess, ChessBase India Foundation"
               onClick={openVideoModal}
-            />
+            >
+              <img
+                src="https://i.ytimg.com/vi/_jPw8otX6Ts/maxresdefault.jpg"
+                srcSet="https://i.ytimg.com/vi/_jPw8otX6Ts/hqdefault.jpg 480w, https://i.ytimg.com/vi/_jPw8otX6Ts/sddefault.jpg 640w, https://i.ytimg.com/vi/_jPw8otX6Ts/maxresdefault.jpg 1280w"
+                sizes="(min-width: 900px) 620px, 92vw"
+                alt="HelpChess — ChessBase India Foundation video"
+                loading="lazy"
+              />
+              <span className="play" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z" />
+                </svg>
+              </span>
+              <span className="duration">2:13</span>
+            </VideoThumb>
           </VideoContainer>
         </SectionVideo>
         <SectionTestimonials id="testimonials">
@@ -570,10 +762,12 @@ export default function Home() {
         </SectionTestimonials>
         <ScrollButtonBox>
           <ScrollButton
+            label="Previous testimonials"
             onClick={() => scrollLeft({ type: "testimonials" })}
           ></ScrollButton>
           <ScrollButton
             left={false}
+            label="Next testimonials"
             onClick={() => scrollRight({ type: "testimonials" })}
           ></ScrollButton>
         </ScrollButtonBox>
@@ -582,12 +776,20 @@ export default function Home() {
           <SectionDescription>
             See how your contributions are helping many chess players.
           </SectionDescription>
-          {reportsLoading ? (
-            <p>Loading...</p>
+          {reportsLoading && reports.length === 0 ? (
+            <div className="articles" aria-busy="true">
+              {Array.from({ length: 6 }, (_, i) => (
+                <NewsCardSkeleton key={i} />
+              ))}
+            </div>
           ) : reports.length === 0 ? (
-            <p>No reports yet.</p>
+            <StatusText>No stories yet.</StatusText>
           ) : (
-            <span className="articles">
+            <div
+              className="articles"
+              key={reportsPage}
+              aria-busy={reportsLoading}
+            >
               {reports.map((report) => (
                 <NewsCard
                   key={report._id}
@@ -595,30 +797,33 @@ export default function Home() {
                   amount={report.amount}
                   description={report.subtitle}
                   thumbnail={report.thumbnail}
-                  month={new Date(report.date).toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
+                  date={report.date}
                   link={report.link}
                 />
               ))}
-            </span>
+            </div>
           )}
-          {!reportsLoading && reportsPage < reportsTotalPages && (
-            <LoadMoreWrapper>
-              <Button
-                title="Load more"
-                secondary
-                onClick={() => {
-                  setReportsLoading(true);
-                  setReportsPage((p) => p + 1);
-                  document.getElementById("stories")?.scrollIntoView({ behavior: "auto" });
-                }}
-              ></Button>
-            </LoadMoreWrapper>
-          )}
+          <Pagination
+            page={reportsPage}
+            totalPages={reportsTotalPages}
+            disabled={reportsLoading}
+            onChange={(page) => {
+              setReportsPage(page);
+              document
+                .getElementById("stories")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          />
         </SectionNews>
         <ImageBannerContainer>
           <CheckPattern className="pattern-top" />
           <CheckPattern className="pattern-bottom" />
-          <img className="banner" src="/images/chess-players-banner.jpeg"></img>
+          <img
+            className="banner"
+            src="/images/chess-players-banner.jpeg"
+            alt="Chess players supported by HelpChess"
+            loading="lazy"
+          />
         </ImageBannerContainer>
 
         <SectionDonate>
@@ -626,15 +831,17 @@ export default function Home() {
           <SectionDescription>
             Nurture chess talent to find the next great Indian chess player.
           </SectionDescription>
-          {donationCardContent.map((card, index) => (
-            <DonateNowCard
-              key={index}
-              title={card.title}
-              img={card.img}
-              subtitle={card.subtitle}
-              description={card.description}
-            />
-          ))}
+          <div className="cards">
+            {donationCardContent.map((card, index) => (
+              <DonateNowCard
+                key={index}
+                title={card.title}
+                img={card.img}
+                subtitle={card.subtitle}
+                description={card.description}
+              />
+            ))}
+          </div>
         </SectionDonate>
         <SectionSupportOrg>
           <SupportOrgCard />
@@ -643,7 +850,12 @@ export default function Home() {
         <ImageBannerContainer>
           <CheckPattern className="pattern-top" />
           <CheckPattern className="pattern-bottom" />
-          <img className="banner" src="/images/banner-last.jpeg"></img>
+          <img
+            className="banner"
+            src="/images/banner-last.jpeg"
+            alt="Young chess players at a tournament"
+            loading="lazy"
+          />
         </ImageBannerContainer>
 
         <SectionScholarship>
@@ -651,22 +863,15 @@ export default function Home() {
           <SectionDescription>
             We support chess players from all over India.
           </SectionDescription>
-          <ApplyForScholarshipCard
-            title="Apply for a scholarship"
-            img="/images/scholarship.jpeg"
-            subtitle="Are you a chess player in need of support?"
-            description="We support chess players from all over India."
-          />
+          <div className="cards" style={{ maxWidth: "640px" }}>
+            <ApplyForScholarshipCard
+              title="Apply for a scholarship"
+              img="/images/scholarship.jpeg"
+              subtitle="Are you a chess player in need of support?"
+              description="We support chess players from all over India."
+            />
+          </div>
         </SectionScholarship>
-
-        <SectionWidgets id="widgets">
-          <p className="title">Raise funds on your livestream.</p>
-          <SectionDescription>
-            Simply add our widgets on your livestream and help us reach out to
-            others.
-          </SectionDescription>
-          <Button title="Coming soon" secondary></Button>
-        </SectionWidgets>
       </HomeContainer>
     </>
   );

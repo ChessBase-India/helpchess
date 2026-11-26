@@ -2,86 +2,93 @@ import styled from "styled-components";
 
 import RazorpayButton from "./RazorpayButton";
 
-const Gradient = styled.div`
-  width: 100%;
-  height: 75%;
-  background: linear-gradient(179.91deg, #ffffff 0.07%, #fff9c1 69.91%);
-  box-shadow: 0px 1px 2px 0px #6000fc4d;
-  border-radius: 10px;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-`;
-
-const Container = styled.div`
+const Container = styled.article`
   position: relative;
-  max-width: 782px;
-  height: fit-content;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: left !important;
-  gap: 2rem;
-  padding: 1rem;
-  margin: 1rem;
+  height: 100%;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffffff 0%, ${({ theme }) => theme.colors.surface} 100%);
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 
-  .text {
-    z-index: 2;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${({ theme }) => theme.shadow.lg};
+  }
+
+  img.cover {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  .body {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: start;
-    gap: 0.4rem;
-    width: 90%;
-    line-height: 1rem;
+    gap: 0.5rem;
+    flex: 1;
+    padding: 1.5rem 1.5rem 1.75rem;
   }
 
   .title {
-    font-family: Inter;
-    font-size: 1.4rem !important;
-    font-weight: 600;
-    line-height: 30px;
-    text-align: left;
-    color: #6562fe;
+    font-family: var(--font-heading), sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: ${({ theme }) => theme.colors.primary};
   }
 
   .subtitle {
-    font-family: Roboto;
-    font-size: 0.9rem;
-    font-weight: 400;
-    line-height: 30px;
-    text-align: left;
-    color: #666666;
+    display: inline-block;
+    width: fit-content;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.5rem;
+    line-height: 1.4;
+    background: ${({ theme }) => theme.colors.primarySoft};
+    color: ${({ theme }) => theme.colors.primary};
+    font-size: 0.8125rem;
+    font-weight: 600;
   }
 
-  img {
-    width: 90%;
-    border-radius: 10px;
-    z-index: 2;
+  .description {
+    color: ${({ theme }) => theme.colors.light};
+    font-size: 1rem;
+    line-height: 1.6;
+    flex: 1;
   }
 
   .buttonBox {
     display: flex;
     gap: 1rem;
-    z-index: 2;
-    width: 90%;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .buttonBox button {
+      width: 100%;
+    }
   }
 `;
 
 export default function DonateNowCard({ img, title, subtitle, description }) {
   return (
     <Container>
-      <img src={img} alt={`${title}-image`} />
-      <span className="text">
-        <p className="title"> {title}</p>
+      <img className="cover" src={img} alt={title} loading="lazy" />
+      <div className="body">
+        <h3 className="title">{title}</h3>
         <p className="subtitle">{subtitle}</p>
         <p className="description">{description}</p>
-      </span>
-      <div className="buttonBox">
-        <RazorpayButton />
+        <div className="buttonBox">
+          <RazorpayButton />
+        </div>
       </div>
-      <Gradient />
     </Container>
   );
 }
